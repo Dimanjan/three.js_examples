@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <div id="scene">
+
+    </div>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        camera.position.z = 5;
+
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        // append to scene div
+        document.getElementById('scene').appendChild(renderer.domElement);
+
+        // cube 
+        const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        const material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+        const cube = new THREE.Mesh( geometry, material );
+
+        // create a  thin roof cube
+        const roof = new THREE.BoxGeometry( 1.2, 0.1, 2 );
+        const roofMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+        const roofCube = new THREE.Mesh( roof, roofMaterial );
+        roofCube.position.y = 0.5;
+        roofCube.position.x = -0.5;
+
+        // rotate the roof by 15 degrees
+        roofCube.rotation.z = Math.PI / 9;
+
+
+        // create a second roof
+        const roof2 = new THREE.BoxGeometry( 1.2, 0.1, 2 );
+        const roof2Material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+        const roof2Cube = new THREE.Mesh( roof2, roof2Material );
+        roof2Cube.position.y = 0.5;
+        roof2Cube.position.x = 0.5;
+
+        // rotate the roof by 15 degrees
+        roof2Cube.rotation.z = -Math.PI / 9;
+
+
+        // set all cubes  as a single object
+        const group = new THREE.Group();
+        group.add( cube );
+        group.add( roofCube );
+        group.add( roof2Cube );
+        scene.add( group );
+
+        // let users rotate
+        document.addEventListener('mousedown', onDocumentMouseDown, false);
+        function onDocumentMouseDown(event) {
+            event.preventDefault();
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+            document.addEventListener('mouseup', onDocumentMouseUp, false);
+        }
+        function onDocumentMouseMove(event) {
+            group.rotation.x += event.movementY * 0.01;
+            group.rotation.y += event.movementX * 0.01;
+        }
+        function onDocumentMouseUp(event) {
+            document.removeEventListener('mousemove', onDocumentMouseMove, false);
+            document.removeEventListener('mouseup', onDocumentMouseUp, false);
+        }
+
+        function animate() {
+            requestAnimationFrame( animate );
+            renderer.render( scene, camera );
+        }
+        animate();
+    </script>
+</body>
+</html>
