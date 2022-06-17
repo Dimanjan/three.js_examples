@@ -1,9 +1,13 @@
 function init() {
     var stats = initStats();
 
-    // default setup
+    // create a scene, that will hold all our elements such as objects, cameras and lights.
     var scene = new THREE.Scene();
+
+    // create a camera, which defines where we're looking at.
     var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    // create a render and set the size
     var renderer = new THREE.WebGLRenderer();
 
     renderer.setClearColor(new THREE.Color(0x000000));
@@ -33,7 +37,7 @@ function init() {
 
     // position the cube
     cube.position.x = -4;
-    cube.position.y = 4;
+    cube.position.y = 3;
     cube.position.z = 0;
 
     // add the cube to the scene
@@ -71,25 +75,52 @@ function init() {
     // add the output of the renderer to the html element
     document.getElementById("webgl-output").appendChild(renderer.domElement);
 
+    // react to resizing of window
+    window.addEventListener('resize', onResize, false);
+    function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+       }
+
     // call the render function
     var step = 0;
-    renderScene();
 
-    function renderScene() {
+    var controls = new function () {
+        this.rotationSpeed = 0.02;
+        this.bouncingSpeed = 0.03;
+    };
+
+    var gui = new dat.GUI();
+    gui.add(controls, 'rotationSpeed', 0, 0.5);
+    gui.add(controls, 'bouncingSpeed', 0, 0.5);
+
+
+    // attach them here, since appendChild needs to be called first
+    var trackballControls = initTrackballControls(camera, renderer);
+    var clock = new THREE.Clock();
+
+    render();
+
+    function render() {
+        // update the stats and the controls
+        trackballControls.update(clock.getDelta());
         stats.update();
-
+        
         // rotate the cube around its axes
-        cube.rotation.x += 0.02;
-        cube.rotation.y += 0.02;
-        cube.rotation.z += 0.02;
+        cube.rotation.x += controls.rotationSpeed;
+        cube.rotation.y += controls.rotationSpeed;
+        cube.rotation.z += controls.rotationSpeed;
 
         // bounce the sphere up and down
-        step += 0.04;
+        step += controls.bouncingSpeed;
         sphere.position.x = 20 + (10 * (Math.cos(step)));
         sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
 
         // render using requestAnimationFrame
-        requestAnimationFrame(renderScene);
+        requestAnimationFrame(render);
         renderer.render(scene, camera);
     }
+    
+       
 }
